@@ -167,7 +167,7 @@ Every supported messenger and every supported LLM / agent dispatcher has its own
 | Channel | Status | Guide |
 |---|---|---|
 | Telegram | **LIVE** (HRD-011 code complete; awaiting live evidence) | [`docs/guides/messengers/TELEGRAM.md`](docs/guides/messengers/TELEGRAM.md) |
-| Slack | Planned (V2) | [`docs/guides/messengers/SLACK.md`](docs/guides/messengers/SLACK.md) |
+| Slack | **LIVE** (HRD-115; live round-trip proven — send + Socket-Mode inbound + reply + threading) | [`docs/guides/messengers/SLACK.md`](docs/guides/messengers/SLACK.md) |
 | Email (SMTP + Resend) | Planned (V2) | [`docs/guides/messengers/EMAIL.md`](docs/guides/messengers/EMAIL.md) |
 | Max | Planned (V2) | [`docs/guides/messengers/MAX.md`](docs/guides/messengers/MAX.md) |
 | Microsoft Teams | Planned (V3) | [`docs/guides/messengers/TEAMS.md`](docs/guides/messengers/TEAMS.md) |
