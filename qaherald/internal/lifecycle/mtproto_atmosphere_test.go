@@ -168,13 +168,13 @@ func TestMTProto_ATMOSphere_SSoTChangeNotifiesGroup(t *testing.T) {
 	// Cleanup (t.Cleanup → LIFO): kill the watch process group, close the
 	// store + log file. The t.TempDir handles file removal.
 	t.Cleanup(func() {
-		_ = syscall.Kill(-watchCmd.Process.Pid, syscall.SIGTERM)
+		_ = killProcessGroup(watchCmd.Process.Pid, syscall.SIGTERM)
 		done := make(chan error, 1)
 		go func() { done <- watchCmd.Wait() }()
 		select {
 		case <-done:
 		case <-time.After(5 * time.Second):
-			_ = syscall.Kill(-watchCmd.Process.Pid, syscall.SIGKILL)
+			_ = killProcessGroup(watchCmd.Process.Pid, syscall.SIGKILL)
 			<-done
 		}
 		watchCancel()

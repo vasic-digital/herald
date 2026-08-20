@@ -226,13 +226,13 @@ func TestSlack_LiveRoundTrip(t *testing.T) {
 			return
 		}
 		teardownDone = true
-		_ = syscall.Kill(-pheraldCmd.Process.Pid, syscall.SIGTERM)
+		_ = killProcessGroup(pheraldCmd.Process.Pid, syscall.SIGTERM)
 		done := make(chan error, 1)
 		go func() { done <- pheraldCmd.Wait() }()
 		select {
 		case pheraldExitErr = <-done:
 		case <-time.After(8 * time.Second):
-			_ = syscall.Kill(-pheraldCmd.Process.Pid, syscall.SIGKILL)
+			_ = killProcessGroup(pheraldCmd.Process.Pid, syscall.SIGKILL)
 			pheraldExitErr = <-done
 		}
 	}

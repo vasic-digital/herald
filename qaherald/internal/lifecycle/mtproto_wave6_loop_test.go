@@ -212,13 +212,13 @@ func TestMTProto_Wave6_AutonomousClosedLoop(t *testing.T) {
 	consumePendingUpdates(t, os.Getenv("HERALD_TGRAM_BOT_TOKEN"))
 	defer func() {
 		// SIGTERM with grace, then SIGKILL
-		_ = syscall.Kill(-pheraldCmd.Process.Pid, syscall.SIGTERM)
+		_ = killProcessGroup(pheraldCmd.Process.Pid, syscall.SIGTERM)
 		done := make(chan error, 1)
 		go func() { done <- pheraldCmd.Wait() }()
 		select {
 		case <-done:
 		case <-time.After(5 * time.Second):
-			_ = syscall.Kill(-pheraldCmd.Process.Pid, syscall.SIGKILL)
+			_ = killProcessGroup(pheraldCmd.Process.Pid, syscall.SIGKILL)
 			<-done
 		}
 	}()
