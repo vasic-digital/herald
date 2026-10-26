@@ -2533,9 +2533,19 @@ check "E145 Tier-2 envelope — the dispatch envelope instructs the LLM to recog
 # is captured in docs/qa/DOCS-CHAIN-PILOT-*/pilot-verify.txt. SKIP-with-reason (§11.4.3) when the
 # docs_chain binary / pandoc / weasyprint are absent (the binary is built from the sibling
 # ~/Projects/docs_chain repo, not installed system-wide).
+# FORMATS-EXPORT SWITCH (operator order 2026-10-26: agents work only with Markdown; the .html/.pdf/.docx exports of
+# tracked Markdown are OFF by default and no longer tracked — constitution/config/formats_export.conf, default false).
+# E146/E147/E148 demand those siblings, so when the switch is OFF each gate announces an honest SKIP-with-reason
+# (§11.4.3 / §11.4.106(E)) and never invokes docs_chain; when it is ON (DOCS_EXPORT=1, or a repository policy
+# `enabled=1`) the original gate runs UNCHANGED. The default + resolution order live ONLY in the constitution lib
+# (scripts/lib/formats_export_guard.sh just locates it); an undiscoverable lib is fail-closed = disabled + announced.
+# Paired mutation proof: tests/test_e2e_docs_chain_formats_switch.sh.
+. "${REPO_ROOT}/scripts/lib/formats_export_guard.sh"
 DC_BIN="$(command -v docs_chain 2>/dev/null || echo /tmp/docs_chain)"
 DC_PILOT_SIB="docs/guides/COMMONS_WATCH.html docs/guides/COMMONS_WATCH.pdf docs/guides/COMMONS_WATCH.docx"
-if [ -x "${DC_BIN}" ] && command -v pandoc >/dev/null 2>&1 && command -v weasyprint >/dev/null 2>&1 \
+if ! herald_formats_export_enabled; then
+    echo "SKIP  E146 Docs Chain drift-gate — formats_export disabled (constitution/config/formats_export.conf default false; operator order 2026-10-26): no .html/.pdf/.docx sibling is tracked or demanded; enable with DOCS_EXPORT=1; §11.4.3 SKIP-with-reason"
+elif [ -x "${DC_BIN}" ] && command -v pandoc >/dev/null 2>&1 && command -v weasyprint >/dev/null 2>&1 \
    && [ -f .docs_chain/contexts/herald-pilot.yaml ]; then
     rm -f .docs_chain/state.json
     if "${DC_BIN}" sync --root . herald-pilot > /tmp/e2e_dc 2>&1 \
@@ -2563,7 +2573,9 @@ fi
 # determinism baseline. The gate restores any rebaselined sibling (git checkout) so it leaves the
 # tree CLEAN. SKIP-with-reason (§11.4.3) when the docs_chain binary / pandoc / weasyprint are absent.
 DC_FLEET_CTX=".docs_chain/contexts/herald-docs.yaml"
-if [ -x "${DC_BIN}" ] && command -v pandoc >/dev/null 2>&1 && command -v weasyprint >/dev/null 2>&1 \
+if ! herald_formats_export_enabled; then
+    echo "SKIP  E147 Docs Chain FLEET drift-gate — formats_export disabled (constitution/config/formats_export.conf default false; operator order 2026-10-26): no .html/.pdf/.docx sibling is tracked or demanded; enable with DOCS_EXPORT=1; §11.4.3 SKIP-with-reason"
+elif [ -x "${DC_BIN}" ] && command -v pandoc >/dev/null 2>&1 && command -v weasyprint >/dev/null 2>&1 \
    && [ -f "${DC_FLEET_CTX}" ]; then
     # snapshot the exact set of fleet siblings so we restore precisely (and assert tree-clean)
     DC_FLEET_SIB="$(awk '/^nodes:/{n=1;next} /^edges:/{n=0} n && /kind: (html|pdf|docx)/{
@@ -2598,7 +2610,9 @@ fi
 # regression cannot pass-bluff this gate.
 echo ""
 echo "== E148: Docs Chain verify-only drift-gate (docs_chain verify herald-docs, §11.4.106) =="
-if [ -x "${DC_BIN}" ] && [ -f "${DC_FLEET_CTX}" ]; then
+if ! herald_formats_export_enabled; then
+    echo "SKIP  E148 docs_chain verify-only drift-gate — formats_export disabled (constitution/config/formats_export.conf default false; operator order 2026-10-26): no .html/.pdf/.docx sibling is tracked or demanded; enable with DOCS_EXPORT=1; §11.4.3 SKIP-with-reason"
+elif [ -x "${DC_BIN}" ] && [ -f "${DC_FLEET_CTX}" ]; then
     if dc_verify_out="$("${DC_BIN}" verify --root . herald-docs 2>&1)" \
        && printf '%s' "${dc_verify_out}" | grep -q 'in-sync'; then
         echo "PASS  E148 docs_chain verify herald-docs — whole tracked-doc corpus in-sync (exit 0 + 'in-sync'); §11.4.106 content-hash drift-gate"
